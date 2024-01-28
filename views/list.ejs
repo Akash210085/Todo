@@ -15,9 +15,12 @@
             </form>
         <% } %> 
        
-       <form action="/" method="post" class="item">
+       <form action="/home" method="post" class="item">
         <input type="text" name="newitem" placeholder="New Input">
         <button type="submit" name="list" value=<%= listTitle %>>+</button>
+       </form>
+       <form action="/logout" method="post">
+        <button class="button" type="submit"><span>Log out </span></button>
        </form>
    </div>
 

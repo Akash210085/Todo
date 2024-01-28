@@ -28,12 +28,20 @@ const workSchema = {
     name:String
 }
 
+const userSchima = {
+    email:String,
+    password:String
+}
+
 const Item = mongoose.model("Item",itemsSchema);
 const workItem = mongoose.model("workItem",workSchema);
+const User = mongoose.model("User",userSchima);
 
+app.get("/",function(req,res){
+    res.render("register");
+})
 
-
-app.get("/", function(req,res){
+app.get("/home", function(req,res){
     const day = date.getDay();
     
 
@@ -42,6 +50,10 @@ app.get("/", function(req,res){
     })
     
 });
+
+app.get("/login",function(req,res){
+    res.render("login");
+})
 
 const item1 = new Item({
     name:"Welcome todo list!"
@@ -55,59 +67,53 @@ const listSchima = {
 }
 const List = mongoose.model("List",listSchima);
 
-// app.get("/:customListName", function(req,res){
-//     const customListName = req.params.customListName;
-
-//     List.findOne({name:customListName}).then(function(err,foundList){
-//         if(!err){
-//             if(!foundList){
-//                 console.log("Doesn't exist!");
-//                 const list = new List({
-//                     name:customListName,
-//                     items:defaultItems
-//                 })
-//                 list.save();
-//                 res.redirect("/"+customListName);
-//             }else{
-//                 console.log("exits!");
-//             }
-//         }else{
-//             console.log(err);
-//         }
-//     })
-
-    
 
 
-//     List.find().then(function(items){
-//         res.render("list",{listTitle: customListName ,newListItems: items});
-//     })
-    
-// });
 
-
-app.post("/",function(req,res){
+app.post("/home",function(req,res){
 
         const item = new Item({
             name:req.body.newitem
         })
         item.save();
         // items.push(req.body.newitem);
-        res.redirect("/");
+        res.redirect("/home");
     
 });
 
+app.post("/register",function(req,res){
+    const newUser = new User({
+        email:req.body.email,
+        password:req.body.password
+    })
+    newUser.save();
+    res.redirect("/login");
+})
+
+app.post("/login",function(req,res){
+    User.findOne({email:req.body.email,password:req.body.password}).then(function(foundUser){
+        if(!foundUser){
+            res.redirect("/login");
+        }else{
+            res.redirect("/home");
+        }
+    })
+})
 async function Delete(id){
     await Item.findByIdAndDelete(id);
 }
 
 app.post("/delete",function(req,res){
     const checkedItemId = req.body.checkbox
-    console.log(checkedItemId);
+    
     Delete(checkedItemId);
     // Item.findByIdAndDelete(checkedItemId);
     // Item.findOneAndDelete(checkedItemId);
-    res.redirect("/");
+    res.redirect("/home");
+})
+
+app.post("/logout",function(req,res){
+    res.redirect("login");
 })
 
 app.listen(process.env.PORT|| 3000, function(){
