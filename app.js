@@ -55,6 +55,10 @@ app.get("/login",function(req,res){
     res.render("login");
 })
 
+app.get("/reset",function(req,res){
+    res.render("reset");
+})
+
 const item1 = new Item({
     name:"Welcome todo list!"
 })
