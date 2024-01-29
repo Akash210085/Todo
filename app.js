@@ -38,7 +38,7 @@ const workItem = mongoose.model("workItem",workSchema);
 const User = mongoose.model("User",userSchima);
 
 app.get("/",function(req,res){
-    res.render("register");
+    res.render("register",{status:""});
 })
 
 app.get("/home", function(req,res){
@@ -86,12 +86,20 @@ app.post("/home",function(req,res){
 });
 
 app.post("/register",function(req,res){
-    const newUser = new User({
-        email:req.body.email,
-        password:req.body.password
+    User.findOne({email:req.body.email,password:req.body.password}).then(function(foundUser){
+        if(foundUser)
+        {
+            res.render("register",{status: "User Already Exist !"})
+        }else{
+            const newUser = new User({
+                email:req.body.email,
+                password:req.body.password
+            })
+            newUser.save();
+            res.redirect("/login");
+        }
     })
-    newUser.save();
-    res.redirect("/login");
+    
 })
 
 app.post("/login",function(req,res){
