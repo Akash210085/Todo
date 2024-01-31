@@ -9,91 +9,51 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.use(express.static('public'));
 
-// const items = ["Buy food","Cook food","Eat food"];
-// const workList = [];
-
 mongoose.connect("mongodb+srv://ak8923307022:Akash123@cluster0.ulu0n2f.mongodb.net/todolistDB")
 
-// const itemsSchema = new mongoose.Schema({
-//     name:String
-// })
-
-// OR
-
-const itemsSchema = {
-    name:String
-}
-
-const workSchema = {
-    name:String
-}
 
 const userSchima = {
-    email:String,
-    password:String
+    email:{type:String,  unique: true},
+    password:String,
+    list:[String]
 }
 
-const Item = mongoose.model("Item",itemsSchema);
-const workItem = mongoose.model("workItem",workSchema);
 const User = mongoose.model("User",userSchima);
 
 app.get("/",function(req,res){
     res.render("register",{status:""});
 })
 
-app.get("/home", function(req,res){
-    const day = date.getDay();
-    
-
-    Item.find().then(function(items){
-        res.render("list",{listTitle: day,newListItems: items});
-    })
-    
-});
 
 app.get("/login",function(req,res){
-    res.render("login");
+    res.render("login",{loginStatus:""});
 })
 
 app.get("/reset",function(req,res){
     res.render("reset");
 })
 
-const item1 = new Item({
-    name:"Welcome todo list!"
-})
 
-const defaultItems = [item1];
-
-const listSchima = {
-    name:String,
-    items:itemsSchema
-}
-const List = mongoose.model("List",listSchima);
-
-
-
-
-app.post("/home",function(req,res){
-
-        const item = new Item({
-            name:req.body.newitem
-        })
-        item.save();
-        // items.push(req.body.newitem);
-        res.redirect("/home");
+app.post("/home", async function(req,res){
+   await User.updateOne({email:req.body.userEmail},{$push:{list:req.body.newitem}});
+    User.findOne({email:req.body.userEmail}).then(function(foundUser){
+         const day = date.getDay();
+         res.render("list",{listTitle: day,newListItems: foundUser.list,userEmail:req.body.userEmail});
+    })
     
 });
 
+
 app.post("/register",function(req,res){
-    User.findOne({email:req.body.email,password:req.body.password}).then(function(foundUser){
+    User.findOne({email:req.body.email}).then(function(foundUser){
         if(foundUser)
         {
             res.render("register",{status: "User Already Exist !"})
         }else{
             const newUser = new User({
                 email:req.body.email,
-                password:req.body.password
+                password:req.body.password,
+                list:[]
             })
             newUser.save();
             res.redirect("/login");
@@ -105,23 +65,21 @@ app.post("/register",function(req,res){
 app.post("/login",function(req,res){
     User.findOne({email:req.body.email,password:req.body.password}).then(function(foundUser){
         if(!foundUser){
-            res.redirect("/login");
+            res.render("login",{loginStatus:"User Not Found !"});
         }else{
-            res.redirect("/home");
+            const day = date.getDay();
+            res.render("list",{listTitle: day,newListItems: foundUser.list,userEmail:req.body.email});
         }
     })
 })
-async function Delete(id){
-    await Item.findByIdAndDelete(id);
-}
 
-app.post("/delete",function(req,res){
-    const checkedItemId = req.body.checkbox
+app.post("/delete", async function(req,res){
     
-    Delete(checkedItemId);
-    // Item.findByIdAndDelete(checkedItemId);
-    // Item.findOneAndDelete(checkedItemId);
-    res.redirect("/home");
+    await User.updateOne({email:req.body.userEmail},{$pull:{list:req.body.checkbox}})
+    User.findOne({email:req.body.userEmail}).then(function(foundUser){
+        const day = date.getDay();
+        res.render("list",{listTitle: day,newListItems: foundUser.list,userEmail:req.body.userEmail});
+   })
 })
 
 app.post("/logout",function(req,res){
