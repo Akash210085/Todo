@@ -191,6 +191,9 @@ h2 {
 
 .clear {
   clear: both; }
+.login-status {
+  height: 27px;
+}
 
 body {
   font-size: 13px;
@@ -299,7 +302,7 @@ figure {
   text-align: center;
  }
  .forget-password-link{
-  margin-top: 143.5px;
+  margin-top: 91.5px;
  }
 
 .term-service {

@@ -26,7 +26,7 @@ app.get("/",function(req,res){
 
 
 app.get("/login",function(req,res){
-    res.render("login",{loginStatus:""});
+    res.render("login",{loginStatus:"     "});
 })
 
 app.get("/reset",function(req,res){
